@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:gstscreen/View/CustomAppBar.dart';
-import 'package:gstscreen/View/GstSearchTool.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gstscreen/Presentation/UI/CustomAppBar.dart';
+import 'package:gstscreen/Presentation/UI/GstSearchTool.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {

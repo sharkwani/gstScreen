@@ -1,77 +1,53 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:gstscreen/Model/ProfileData.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_riverpod/all.dart';
+
+import 'file:///C:/Users/LENOVO/AndroidStudioProjects/gstscreen/lib/application/DataController.dart';
 
 import 'SplashScreen.dart';
 
-class GstProfile extends StatefulWidget {
+class GstProfileProvider extends StatefulWidget {
   final String profileId;
 
-  const GstProfile({this.profileId});
+  const GstProfileProvider({this.profileId});
   @override
-  _GstProfileState createState() => _GstProfileState();
+  _GstProfileProviderState createState() => _GstProfileProviderState();
 }
 
-class _GstProfileState extends State<GstProfile> {
+class _GstProfileProviderState extends State<GstProfileProvider> {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: getProfileData(),
-      builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-        if (snapshot.data == null) {
-          return SplashScreen();
-        } else {
-          return snapshot.data is bool
+    final profileDataModel = FutureProvider(
+        (_) => DataController.callHttpClient(widget.profileId.toUpperCase()));
+
+    return Consumer(builder: (context, watch, child) {
+      AsyncValue data = watch(profileDataModel);
+      return data.when(
+          data: (data) => data is bool
               ? Scaffold(
                   body: Center(
                       child: Text(
-                  "No Data avaible for the id ${widget.profileId} ",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                )))
+                          "No data retrieved using the id ${widget.profileId}")))
               : Scaffold(
                   body: SafeArea(
                   child: CustomScrollView(
                     physics: ClampingScrollPhysics(),
                     slivers: <Widget>[
-                      _buildHeader(snapshot.data.name, snapshot.data.status),
-                      _buildContainer(snapshot.data.address),
-                      _buildContainerTwo(snapshot.data.taxPayerType),
+                      _buildHeader(data.name, data.status),
+                      _buildContainer(data.address),
+                      _buildContainerTwo(data.taxPayerType),
                       _buildContainerThree("Constitution of Bussiness",
-                          snapshot.data.businessType, false),
+                          data.businessType, false),
                       _buildContainerThree("Date of Registration",
-                          snapshot.data.dateOfRegistration, true),
+                          data.dateOfRegistration, true),
                       _buildButton()
                     ],
                   ),
-                ));
-        }
-      },
-    );
-  }
-
-  Future<dynamic> getProfileData() async {
-    try {
-      var response = await http.get(Uri.https("semicolin.pythonanywhere.com",
-          "getSearchResult/${widget.profileId.toUpperCase()}"));
-      var responseData = jsonDecode(response.body);
-      if (responseData.keys.contains("error")) {
-        return false;
-      } else {
-        ProfileData profileData = new ProfileData(
-            responseData["name"],
-            responseData["status"],
-            responseData["address"],
-            responseData["tax payer type"],
-            responseData["business type"],
-            responseData["date of registration"]);
-        return profileData;
-      }
-    } catch (exception) {
-      return true;
-    }
+                )),
+          loading: () => Scaffold(body: SplashScreen()),
+          error: (e, stackTrace) =>
+              Center(child: Text("SomeThing went wrong")));
+    });
   }
 
   SliverPadding _buildHeader(companyName, isActive) {

@@ -1,6 +1,6 @@
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:flutter/material.dart';
-import 'package:gstscreen/View/GstProfile.dart';
+import 'package:gstscreen/Presentation/UI/GstProfileProvider.dart';
 
 class GstSearchTool extends StatefulWidget {
   @override
@@ -111,7 +111,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => GstProfile(
+                        builder: (context) => GstProfileProvider(
                               profileId: _textController.text,
                             )),
                   );
